@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lịch Phát Sóng - Try2Live</title>
+<style>
+    :root {
+        --bg-main: #0a0c10;
+        --card-bg: #141820;
+        --card-hover: #1c2333;
+        --pc-color: #ff3344;
+        --pc-glow: rgba(255, 51, 68, 0.35);
+        --sw-color: #00d2ff;
+        --sw-glow: rgba(0, 210, 255, 0.35);
+        --text-main: #f0f6fc;
+        --text-muted: #8b949e;
+        --border-color: #272f3d;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system, BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; }
+    body { background: radial-gradient(circle at 50% 0%, #12161f 0%, var(--bg-main) 55%); color: var(--text-main); min-height:100vh; display:flex; justify-content:center; align-items:center; padding:30px 16px; }
+    .container { width:100%; max-width:700px; background-color:var(--card-bg); border-radius:20px; border:1px solid var(--border-color); box-shadow:0 25px 50px -12px rgba(0,0,0,0.7); overflow:hidden; }
+    .header { padding:22px 24px 18px; text-align:center; border-bottom:1px solid var(--border-color); background:linear-gradient(180deg, rgba(255,51,68,0.08) 0%, transparent 100%); }
+    .header h1 { font-size:1.7rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+    .lang-switch-wrap { display:flex; justify-content:center; margin-bottom:12px; }
+    .lang-switch { display:inline-flex; align-items:center; background-color:#0d1117; border:1px solid var(--border-color); border-radius:20px; padding:3px; }
+    .lang-btn { background:transparent; border:none; color:var(--text-muted); padding:4px 14px; border-radius:16px; font-size:0.75rem; font-weight:800; cursor:pointer; letter-spacing:0.5px; transition:all 0.2s ease; }
+    .lang-btn:hover { color:#fff; }
+    .lang-btn.active { background:linear-gradient(135deg, var(--pc-color), #990011); color:#fff; box-shadow:0 0 10px var(--pc-glow); }
+    .btn-subscribe {
+        display:inline-flex; align-items:center; gap:6px; margin-top:14px; padding:10px 22px; border-radius:24px;
+        background:linear-gradient(135deg, #ff0000, #b30000); color:#fff; font-weight:800; font-size:0.82rem;
+        letter-spacing:0.3px; text-decoration:none; text-transform:uppercase; box-shadow:0 8px 20px rgba(255,0,0,0.35);
+        transition:transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-subscribe:hover { transform:translateY(-2px); box-shadow:0 12px 26px rgba(255,0,0,0.5); }
+    .schedule-note { margin-top:10px; font-size:0.75rem; color:var(--text-muted); font-style:italic; }
+    .filter-tabs { display:flex; justify-content:center; gap:8px; padding:16px 20px 8px; flex-wrap:wrap; }
+    .tab-btn { background-color:#1a202c; border:1px solid var(--border-color); color:var(--text-muted); padding:6px 16px; border-radius:20px; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.25s ease; }
+    .tab-btn:hover { color:#fff; transform:translateY(-1px); }
+    .tab-btn.active { background-color:var(--pc-color); color:#fff; border-color:var(--pc-color); box-shadow:0 0 14px var(--pc-glow); }
+    .search-row { padding:4px 20px 12px; }
+    .search-row input {
+        width:100%; background-color:#0f131b; border:1px solid var(--border-color); color:var(--text-main);
+        padding:10px 14px; border-radius:10px; font-size:0.9rem; outline:none; box-sizing:border-box; transition:border-color 0.2s ease;
+    }
+    .search-row input:focus { border-color: var(--sw-color); }
+    .search-row input::placeholder { color: var(--text-muted); }
+    .search-wrap { position:relative; }
+    .search-wrap input { padding-right:34px; }
+    .search-clear {
+        position:absolute; right:6px; top:50%; transform:translateY(-50%); background:transparent; border:none;
+        color:var(--text-muted); cursor:pointer; font-size:0.85rem; padding:6px; line-height:1;
+    }
+    .search-clear:hover { color:#fff; }
+    .empty-note { text-align:center; color:var(--text-muted); font-size:0.85rem; padding:20px; }
+    .timeline { padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
+    .schedule-card { background-color:#181e29; border:1px solid var(--border-color); border-radius:14px; padding:18px 20px; display:grid; grid-template-columns:130px 1fr auto; align-items:center; gap:16px; position:relative; overflow:hidden; transition:all 0.3s ease; }
+    .schedule-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; transition:width 0.25s ease; }
+    .schedule-card.pc::before { background-color:#2f6fed; }
+    .schedule-card.switch::before { background-color:#ff3344; }
+    .schedule-card.other::before { background-color:#8b949e; }
+    .live-indicator {
+        display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; font-weight:800; letter-spacing:0.5px;
+        background:linear-gradient(135deg, var(--pc-color), #990011); color:#fff; padding:2px 8px; border-radius:4px;
+        animation: pulseLive 1.4s infinite; text-decoration:none; cursor:pointer; text-transform:uppercase;
+    }
+    .live-indicator:hover { filter:brightness(1.1); }
+    @keyframes pulseLive { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    .schedule-card.is-live-now { border-color:#ff3344; box-shadow:0 0 0 1px rgba(255,51,68,0.45), 0 10px 24px var(--pc-glow); }
+    .streamed-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; font-weight:800; letter-spacing:0.5px; color:#8b949e; padding:2px 8px; border:1px solid #4b5563; border-radius:4px; text-transform:uppercase; }
+    .schedule-card.is-streamed { filter:grayscale(1); opacity:0.55; }
+    .schedule-card.is-streamed:hover { opacity:0.75; }
+    .countdown-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.68rem; font-weight:800; letter-spacing:0.3px; color:#f59e0b; }
+    .week-swipe-hint { text-align:center; font-size:0.7rem; color:var(--text-muted); padding:4px 20px 0; }
+    .week-day-today { position:relative; box-shadow: inset 0 0 0 2px #1e40ff; animation: blinkToday 1.4s infinite; }
+    @keyframes blinkToday { 0%,100% { box-shadow: inset 0 0 0 2px #1e40ff; } 50% { box-shadow: inset 0 0 0 2px rgba(30,64,255,0.25); } }
+    .schedule-card:hover { transform:translateY(-3px) scale(1.01); background-color:var(--card-hover); border-color:rgba(255,255,255,0.2); }
+    .schedule-card.pc:hover { box-shadow:0 10px 24px rgba(47,111,237,0.35); }
+    .schedule-card.switch:hover { box-shadow:0 10px 24px rgba(255,51,68,0.35); }
+    .schedule-card:hover::before { width:8px; }
+    .date-col { display:flex; flex-direction:column; gap:2px; }
+    .date-day { font-size:0.95rem; font-weight:700; color:#fff; }
+    .date-weekday { font-size:0.8rem; color:#58a6ff; font-weight:600; }
+    .game-col { display:flex; align-items:center; }
+    .game-title-wrap { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .game-name { font-size:1.05rem; font-weight:700; color:#fff; }
+    .tag-platform { display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; padding:2px 7px; border-radius:4px; font-weight:800; letter-spacing:0.5px; text-transform:uppercase; }
+    .tag-pc { background:linear-gradient(135deg,#2f6fed,#1d4ed8); color:#fff; box-shadow:0 0 8px rgba(47,111,237,0.4); }
+    .tag-switch { background:linear-gradient(135deg,#ff3344,#990011); color:#fff; box-shadow:0 0 8px rgba(255,51,68,0.4); }
+    .tag-other { background:linear-gradient(135deg,#8b949e,#4b5563); color:#fff; }
+    .live-badge { padding:8px 14px; border-radius:10px; text-align:right; display:flex; flex-direction:column; align-items:flex-end; min-width:115px; transition:transform 0.2s ease; }
+    .schedule-card.pc .live-badge { background-color:#12233f; border:1px solid rgba(47,111,237,0.35); color:#8ab4ff; }
+    .schedule-card.switch .live-badge { background-color:#231215; border:1px solid rgba(255,51,68,0.35); color:#ff6b7a; }
+    .schedule-card.other .live-badge { background-color:#1a1e26; border:1px solid rgba(139,148,158,0.35); color:#c9d1d9; }
+    .schedule-card:hover .live-badge { transform:scale(1.05); }
+    .live-badge .badge-label { font-size:0.68rem; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; opacity:0.85; }
+    .live-badge .badge-time { font-size:0.9rem; font-weight:800; }
+    .footer-note { text-align:center; padding:14px 20px 22px; font-size:0.75rem; color:var(--text-muted); }
+    .queue-section { margin:10px 20px 24px; background-color:#121620; border:1px dashed #343d52; border-radius:14px; padding:16px 18px; }
+    .queue-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+    .queue-title { font-size:0.85rem; font-weight:700; text-transform:uppercase; color:#f59e0b; letter-spacing:0.5px; }
+    .queue-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; }
+    .queue-card { background-color:#1a202c; border:1px solid #2d3748; border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:6px; transition:all 0.2s ease; }
+    .queue-card:hover { transform:translateY(-2px); background-color:#242c3d; border-color:#4a5568; }
+    .queue-name { font-size:0.88rem; font-weight:700; color:#e2e8f0; }
+    .queue-card .tag-platform { align-self:flex-start; }
+    .view-toggle { display:flex; gap:8px; padding:16px 20px 0; }
+    .view-toggle-btn { flex:1; background-color:#1a202c; border:1px solid var(--border-color); color:var(--text-muted); padding:9px 10px; border-radius:10px; font-size:0.8rem; font-weight:700; cursor:pointer; transition:all 0.2s ease; }
+    .view-toggle-btn:hover { color:#fff; }
+    .view-toggle-btn.active { background-color:var(--sw-color); color:#04222c; border-color:var(--sw-color); }
+    
+    .week-nav-bar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 20px 0; }
+    .week-nav-btn {
+        background-color:#1a202c; border:1px solid var(--border-color); color:var(--text-main);
+        padding:8px 14px; border-radius:10px; font-size:0.78rem; font-weight:700; cursor:pointer;
+        transition:all 0.2s ease; display:inline-flex; align-items:center; gap:6px;
+    }
+    .week-nav-btn:hover:not(:disabled) { background-color:var(--card-hover); border-color:var(--sw-color); color:#fff; transform:translateY(-1px); }
+    .week-nav-btn:disabled { opacity:0.35; cursor:not-allowed; border-color:var(--border-color); transform:none; }
+    .week-nav-btn.week-nav-current { background:#142035; border-color:#2b4c7e; color:#58a6ff; }
+    .week-nav-btn.week-nav-current:hover:not(:disabled) { background:#1c3258; border-color:#58a6ff; color:#fff; }
+    .week-nav-btn.week-nav-current.is-active { background:rgba(0, 210, 255, 0.15); border-color:var(--sw-color); color:var(--sw-color); box-shadow:0 0 10px var(--sw-glow); }
+
+    .week-title { padding:12px 20px 0; font-size:0.82rem; font-weight:800; color:#f59e0b; text-transform:uppercase; letter-spacing:0.5px; text-align:center; }
+    .week-scroll { overflow-x:auto; padding:10px 20px 6px; }
+    .week-grid { display:grid; grid-template-columns:repeat(7, minmax(110px, 1fr)); gap:1px; background-color:var(--border-color); min-width:770px; border-radius:10px; overflow:hidden; }
+    .week-day-header { background-color:#1c3d6b; color:#fff; text-align:center; padding:10px 6px; }
+    .week-day-name { font-weight:800; font-size:0.75rem; text-transform:uppercase; }
+    .week-day-date { font-size:0.68rem; opacity:0.85; margin-top:2px; }
+    .week-day-body { background-color:#141820; min-height:120px; padding:6px; display:flex; flex-direction:column; gap:6px; }
+    .week-card { background-color:#1a202c; border:1px solid #2d3748; border-radius:8px; padding:8px 6px; text-align:center; }
+    .week-card-game { font-size:0.72rem; font-weight:800; color:#ff5566; margin-bottom:3px; }
+    .week-card-line { font-size:0.64rem; color:#93c5fd; margin-top:2px; }
+    .week-card-line.week-tag { margin-top:4px; }
+    .week-card .live-indicator, .week-card .streamed-badge, .week-card .countdown-badge { margin-top:4px; justify-content:center; font-size:0.62rem; }
+    .week-card.is-live-now { border-color:#ff3344; box-shadow:0 0 0 1px rgba(255,51,68,0.45); }
+    .week-card.is-streamed { filter:grayscale(1); opacity:0.55; }
+    .timezone-note { text-align:right; padding:0 20px; font-size:0.68rem; color:var(--text-muted); font-style:italic; }
+    @media (max-width:620px) {
+        .schedule-card { grid-template-columns:1fr; gap:10px; }
+        .live-badge { align-items:flex-start; text-align:left; width:100%; }
+        .week-nav-btn { padding:6px 10px; font-size:0.72rem; }
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="lang-switch-wrap">
+                <div class="lang-switch">
+                    <button type="button" class="lang-btn" id="langBtnVi" onclick="setLanguage('vi')">VIE</button>
+                    <button type="button" class="lang-btn" id="langBtnEn" onclick="setLanguage('en')">ENG</button>
+                </div>
+            </div>
+            <h1>Try2Live</h1>
+            <a class="btn-subscribe" id="btnSubscribe" href="https://www.youtube.com/@try2_live?sub_confirmation=1" target="_blank" rel="noopener noreferrer">🔔 Subscribe kênh</a>
+            <div class="schedule-note" id="headerScheduleNote">Có thể bắt đầu hoặc kết thúc sớm/trễ hơn lịch</div>
+        </div>
+        <div class="timezone-note" id="timezoneNote">🕐 Giờ Việt Nam - GMT+7</div>
+        <div class="view-toggle">
+            <button class="view-toggle-btn active" id="viewBtnStrip" onclick="switchView('strip')">📋 Dạng dải</button>
+            <button class="view-toggle-btn" id="viewBtnWeek" onclick="switchView('week')">🗓️ Dạng lịch tuần</button>
+        </div>
+        <div id="stripViewWrap">
+            <div class="filter-tabs">
+                <button class="tab-btn active" id="tabAll" onclick="filterSchedule('all', this)">Tất cả</button>
+                <button class="tab-btn" onclick="filterSchedule('pc', this)">PC</button>
+                <button class="tab-btn" onclick="filterSchedule('switch', this)">Switch 2</button>
+                <button class="tab-btn" id="tabOther" onclick="filterSchedule('other', this)">Khác</button>
+            </div>
+            <div class="search-row">
+                <div class="search-wrap">
+                    <input type="text" id="gameSearchInput" placeholder="🔍 Tìm tên game..." oninput="applyFilters()">
+                    <button type="button" class="search-clear" id="searchClearBtn" onclick="clearSearch()" style="display:none;">✕</button>
+                </div>
+            </div>
+            <div class="timeline" id="scheduleList"></div>
+            <div class="empty-note" id="filterEmptyState" style="display:none;">Hiện tại chưa có lịch o_o ....</div>
+        </div>
+        <div id="weekViewWrap" style="display:none;">
+            <div class="week-nav-bar" id="weekNavBar">
+                <button type="button" class="week-nav-btn" id="btnPrevWeek" onclick="changeWeek(-1)">◀ <span id="txtBtnPrev">Tuần trước</span></button>
+                <button type="button" class="week-nav-btn week-nav-current" id="btnCurrentWeek" onclick="goToCurrentWeek()"><span id="txtBtnCurrent">Tuần hiện tại</span></button>
+                <button type="button" class="week-nav-btn" id="btnNextWeek" onclick="changeWeek(1)"><span id="txtBtnNext">Tuần sau</span> ▶</button>
+            </div>
+            <div class="week-title" id="weekTitleDisplay"></div>
+            <div class="week-swipe-hint" id="weekSwipeHint">← vuốt để xem thêm →</div>
+            <div class="week-scroll">
+                <div class="week-grid" id="weekGridDisplay"></div>
+            </div>
+            <div class="empty-note" id="weekEmptyState" style="display:none;"></div>
+        </div>
+        <div id="queueSectionWrap"></div>
+        <div class="footer-note" id="footerNote">Lịch có thể thay đổi tuỳ tình hình 🐧</div>
+    </div>
+
+    <script>
+        const SCHEDULE_DATA = [{"dateStr":"13/09/2026","timestamp":1789232400000,"game":"Resident Evil 3","start":"21:00","end":"22:30","platform":"pc"},{"dateStr":"17/09/2026","timestamp":1789578000000,"game":"Resident Evil 7","start":"21:00","end":"22:30","platform":"pc"},{"dateStr":"19/09/2026","timestamp":1789750800000,"game":"Resident Evil 7","start":"21:00","end":"22:30","platform":"pc"},{"dateStr":"21/09/2026","timestamp":1789923600000,"game":"Resident Evil 7","start":"21:00","end":"22:30","platform":"pc"},{"dateStr":"22/09/2026","timestamp":1790010000000,"game":"Resident Evil 7","start":"21:00","end":"22:30","platform":"pc"},{"dateStr":"26/09/2026","timestamp":1790355600000,"game":"Resident Evil 7","start":"21:00","end":"22:30","platform":"pc"},{"dateStr":"29/09/2026","timestamp":1790614800000,"game":"Resident Evil 7","start":"21:00","end":"22:30","platform":"pc"},{"dateStr":"03/10/2026","timestamp":1790960400000,"game":"Resident Evil 8","start":"21:00","end":"22:30","platform":"pc"}];
+        const QUEUE_DATA = [{"game":"Metaphor: ReFantazio","platform":"switch","id":"q_mtmpaqiy_dqdiv9"},{"game":"Lies of P","platform":"switch","likelihood":"low","id":"q_mtmpaqiy_e4ab3y"},{"game":"Stellar Blade","platform":"switch","likelihood":"low","id":"q_mtmpaqiy_4y5o1v"},{"game":"Resident Evil 8","platform":"pc","likelihood":"high","id":"q_mtmpaqiy_e8u1sa"},{"game":"Resident Evil 4","platform":"switch","likelihood":"high"},{"game":"Persona 4 Revival","platform":"switch"},{"game":"Persona 6","platform":"switch"}];
+        const I18N = {"vi":{"pageTitle":"Lịch Phát Sóng - Try2Live","subTitle":"Nhập lịch live stream cho 5 ngày sắp tới","viewerSubTitle":"Có thể bắt đầu hoặc kết thúc sớm/trễ hơn lịch","btnSubscribe":"🔔 Subscribe kênh","formHeading":"📝 Nhập lịch (5 ngày)","dayPrefix":"Ngày ","copyPrev":"📋 Giống ngày trước","lblDate":"Ngày (dd/mm hoặc dd/mm/yyyy)","lblPlatform":"Nền tảng","lblGame":"Tên game","lblStart":"Giờ bắt đầu","lblEnd":"Giờ kết thúc","btnSave":"Lưu & Cập nhật lịch","btnExport":"⬇ Xuất file Viewer (chỉ xem)","btnClearAll":"Xoá toàn bộ lịch đã lưu","queueHeading":"⚡ Hàng chờ (Sắp tới có thể Live)","queuePlaceholder":"Tên game","btnAddQueue":"+ Thêm","queueEmpty":"Chưa có game nào trong hàng chờ.","timezoneNote":"🕐 Giờ Việt Nam - GMT+7","viewStrip":"📋 Dạng dải","viewWeek":"🗓️ Dạng lịch tuần","tabAll":"Tất cả","tabOther":"Khác","searchPlaceholder":"🔍 Tìm tên game...","emptyTimeline":"Chưa có lịch nào — hãy nhập lịch ở phần trên.","emptyFilter":"Hiện tại chưa có lịch o_o ....","emptyWeek":"Tuần này không có lịch stream nào.","badgeLiveWindow":"Khung Giờ Live","badgeEnded":"Đã kết thúc","countdownPrefix":"⏳ Live sau ","footerNoteAdmin":"Lịch có thể thay đổi tuỳ tình hình 🐧","footerNoteViewer":"Lịch có thể thay đổi tuỳ tình hình 🐧","btnPrevWeek":"Tuần trước","btnNextWeek":"Tuần sau","btnCurrentWeek":"Tuần hiện tại","weekTitlePrefix":"Tuần ","swipeHint":"← vuốt để xem thêm →","confirmClear":"Xoá toàn bộ lịch đã lưu?","alertFillDay":"Vui lòng nhập ít nhất 1 ngày với đầy đủ Ngày và Tên game.","alertEnterGame":"Vui lòng nhập tên game.","alertNoDataExport":"Chưa có lịch nào để xuất. Hãy nhập và bấm \"Lưu & Cập nhật lịch\" trước.","weekdays":["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"],"gridDays":["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","Chủ Nhật"],"platformOther":"Khác","btnDelete":"Xoá"},"en":{"pageTitle":"Stream Schedule - Try2Live","subTitle":"Enter stream schedule for the next 5 days","viewerSubTitle":"May start or end earlier/later than scheduled","btnSubscribe":"🔔 Subscribe","formHeading":"📝 Schedule Input (5 Days)","dayPrefix":"Day ","copyPrev":"📋 Same as previous","lblDate":"Date (dd/mm or dd/mm/yyyy)","lblPlatform":"Platform","lblGame":"Game title","lblStart":"Start time","lblEnd":"End time","btnSave":"Save & Update Schedule","btnExport":"⬇ Export Viewer File (View only)","btnClearAll":"Clear All Saved Schedule","queueHeading":"⚡ Queue (Potential Upcoming Streams)","queuePlaceholder":"Game title","btnAddQueue":"+ Add","queueEmpty":"No games in queue.","timezoneNote":"🕐 Vietnam Time - GMT+7","viewStrip":"📋 Timeline View","viewWeek":"🗓️ Week View","tabAll":"All","tabOther":"Other","searchPlaceholder":"🔍 Search game title...","emptyTimeline":"No schedule yet — enter above.","emptyFilter":"No stream scheduled right now o_o ....","emptyWeek":"No streams scheduled for this week.","badgeLiveWindow":"Live Schedule","badgeEnded":"Ended","countdownPrefix":"⏳ Live in ","footerNoteAdmin":"Schedule may change depending on circumstances 🐧 ","footerNoteViewer":"Schedule may change depending on circumstances 🐧","btnPrevWeek":"Previous Week","btnNextWeek":"Next Week","btnCurrentWeek":"Current Week","weekTitlePrefix":"Week of ","swipeHint":"← swipe to view more →","confirmClear":"Clear all saved schedule?","alertFillDay":"Please enter at least 1 day with valid Date and Game title.","alertEnterGame":"Please enter game title.","alertNoDataExport":"No schedule to export. Please save schedule first.","weekdays":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"gridDays":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"platformOther":"Other","btnDelete":"Delete"}};
+
+        let currentLang = 'vi';
+        try {
+            const saved = localStorage.getItem('try2live_lang_v1');
+            if (saved === 'en' || saved === 'vi') currentLang = saved;
+        } catch (e) {}
+
+        let currentCategory = 'all';
+        let selectedWeekMonday = null;
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            try { localStorage.setItem('try2live_lang_v1', lang); } catch (e) {}
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const t = I18N[currentLang];
+            document.documentElement.lang = currentLang;
+            document.title = t.pageTitle;
+
+            document.getElementById('langBtnVi').classList.toggle('active', currentLang === 'vi');
+            document.getElementById('langBtnEn').classList.toggle('active', currentLang === 'en');
+
+            const btnSubscribe = document.getElementById('btnSubscribe');
+            if (btnSubscribe) btnSubscribe.textContent = t.btnSubscribe;
+
+            const headerScheduleNote = document.getElementById('headerScheduleNote');
+            if (headerScheduleNote) headerScheduleNote.textContent = t.viewerSubTitle;
+
+            const timezoneNote = document.getElementById('timezoneNote');
+            if (timezoneNote) timezoneNote.textContent = t.timezoneNote;
+
+            const viewStrip = document.getElementById('viewBtnStrip');
+            if (viewStrip) viewStrip.textContent = t.viewStrip;
+
+            const viewWeek = document.getElementById('viewBtnWeek');
+            if (viewWeek) viewWeek.textContent = t.viewWeek;
+
+            const tabAll = document.getElementById('tabAll');
+            if (tabAll) tabAll.textContent = t.tabAll;
+
+            const tabOther = document.getElementById('tabOther');
+            if (tabOther) tabOther.textContent = t.tabOther;
+
+            const searchInput = document.getElementById('gameSearchInput');
+            if (searchInput) searchInput.placeholder = t.searchPlaceholder;
+
+            const txtBtnPrev = document.getElementById('txtBtnPrev');
+            if (txtBtnPrev) txtBtnPrev.textContent = t.btnPrevWeek;
+
+            const txtBtnCurrent = document.getElementById('txtBtnCurrent');
+            if (txtBtnCurrent) txtBtnCurrent.textContent = t.btnCurrentWeek;
+
+            const txtBtnNext = document.getElementById('txtBtnNext');
+            if (txtBtnNext) txtBtnNext.textContent = t.btnNextWeek;
+
+            const swipeHint = document.getElementById('weekSwipeHint');
+            if (swipeHint) swipeHint.textContent = t.swipeHint;
+
+            const footerNote = document.getElementById('footerNote');
+            if (footerNote) footerNote.textContent = t.footerNoteViewer;
+
+            renderSchedule();
+            renderQueue();
+        }
+
+        function tagLabel(platform) {
+            const t = I18N[currentLang];
+            const pcIcon = '<svg class="platform-icon" viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><rect x="2" y="4" width="20" height="13" rx="1.5"></rect><rect x="9" y="19" width="6" height="1.6" rx="0.8"></rect></svg>';
+            const switchIcon = '<svg class="platform-icon" viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><rect x="2" y="7" width="20" height="10" rx="5"></rect><rect x="6.4" y="10.7" width="4" height="1.5" fill="#ffffff"></rect><rect x="7.65" y="9.45" width="1.5" height="4" fill="#ffffff"></rect><circle cx="17" cy="9.8" r="1.05" fill="#ffffff"></circle><circle cx="15" cy="12.3" r="1.05" fill="#ffffff"></circle></svg>';
+            if (platform === 'pc') return { cls: 'tag-pc', text: 'PC', icon: pcIcon };
+            if (platform === 'switch') return { cls: 'tag-switch', text: 'Switch 2', icon: switchIcon };
+            return { cls: 'tag-other', text: t.platformOther, icon: '' };
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function parseVNDateTime(dateStr, timeStr) {
+            if (!dateStr || !timeStr) return null;
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return null;
+            const d = Number(parts[0]), m = Number(parts[1]), y = Number(parts[2]);
+            const timeParts = timeStr.split(':');
+            const hh = Number(timeParts[0]), mm = Number(timeParts[1]) || 0;
+            if (!d || !m || !y || isNaN(hh)) return null;
+            return Date.UTC(y, m - 1, d, hh, mm) - 7 * 3600 * 1000;
+        }
+
+        function getLiveRange(item) {
+            const startMs = parseVNDateTime(item.dateStr, item.start);
+            if (startMs === null) return null;
+            let endMs = item.end ? parseVNDateTime(item.dateStr, item.end) : startMs + 2 * 3600 * 1000;
+            if (endMs === null || endMs <= startMs) endMs = startMs + 2 * 3600 * 1000;
+            return { startMs, endMs };
+        }
+
+        function renderSchedule() {
+            const t = I18N[currentLang];
+            const list = document.getElementById('scheduleList');
+            list.innerHTML = '';
+            if (SCHEDULE_DATA.length === 0) {
+                list.innerHTML = '<div class="empty-note">' + t.emptyFilter + '</div>';
+                renderWeekView(SCHEDULE_DATA);
+                return;
+            }
+            SCHEDULE_DATA.forEach((item, index) => {
+                const d = new Date(item.timestamp);
+                const weekday = t.weekdays[d.getDay()];
+                const tag = tagLabel(item.platform);
+                const range = getLiveRange(item);
+                const card = document.createElement('div');
+                card.className = 'schedule-card ' + item.platform;
+                card.setAttribute('data-category', item.platform);
+                card.style.animationDelay = Math.min(index, 10) * 0.05 + 's';
+                if (range) {
+                    card.dataset.startMs = range.startMs;
+                    card.dataset.endMs = range.endMs;
+                }
+                card.innerHTML = `
+                    <div class="date-col">
+                        <div class="date-day">${escapeHtml(item.dateStr)}</div>
+                        <div class="date-weekday">${weekday}</div>
+                    </div>
+                    <div class="game-col">
+                        <div class="game-title-wrap">
+                            <span class="game-name">${escapeHtml(item.game)}</span>
+                            <span class="tag-platform ${tag.cls}">${tag.icon}${tag.text}</span>
+                            <a class="live-indicator" href="https://youtube.com/@try2_live" target="_blank" rel="noopener noreferrer" style="display:none;">🔴 LIVE</a>
+                            <span class="countdown-badge" style="display:none;"></span>
+                            <span class="streamed-badge" style="display:none;">${t.badgeEnded}</span>
+                        </div>
+                    </div>
+                    <div class="live-badge">
+                        <span class="badge-label">${t.badgeLiveWindow}</span>
+                        <span class="badge-time">${escapeHtml(item.start || '--:--')} – ${escapeHtml(item.end || '--:--')}</span>
+                    </div>`;
+                list.appendChild(card);
+            });
+            applyFilters();
+            updateLiveBadges();
+            renderWeekView(SCHEDULE_DATA);
+        }
+
+        function renderQueue() {
+            const wrap = document.getElementById('queueSectionWrap');
+            if (QUEUE_DATA.length === 0) {
+                wrap.innerHTML = '';
+                return;
+            }
+            const t = I18N[currentLang];
+            const cards = QUEUE_DATA.map(item => {
+                const tag = tagLabel(item.platform);
+                return `<div class="queue-card"><span class="queue-name">${escapeHtml(item.game)}</span><span class="tag-platform ${tag.cls}">${tag.icon}${tag.text}</span></div>`;
+            }).join('');
+            wrap.innerHTML = `
+                <div class="queue-section">
+                    <div class="queue-header"><span class="queue-title">${t.queueHeading}</span></div>
+                    <div class="queue-grid">${cards}</div>
+                </div>`;
+        }
+
+        function getMondayOfWeek(date) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            const day = d.getDay();
+            const diff = (day === 0 ? -6 : 1 - day);
+            d.setDate(d.getDate() + diff);
+            return d;
+        }
+
+        function getWeekDataStructure(data) {
+            const currentMonday = getMondayOfWeek(new Date()).getTime();
+            const weeks = {};
+            data.forEach(item => {
+                const monday = getMondayOfWeek(new Date(item.timestamp)).getTime();
+                if (!weeks[monday]) weeks[monday] = [];
+                weeks[monday].push(item);
+            });
+            const weekKeysSet = new Set(Object.keys(weeks).map(Number));
+            weekKeysSet.add(currentMonday);
+            const weekKeys = Array.from(weekKeysSet).sort((a, b) => a - b);
+            return { weeks, weekKeys, currentMonday };
+        }
+
+        function ensureSelectedWeek(data) {
+            const { weeks, weekKeys, currentMonday } = getWeekDataStructure(data);
+            if (weekKeys.length === 0) {
+                selectedWeekMonday = null;
+                return;
+            }
+            if (selectedWeekMonday !== null && weekKeys.includes(selectedWeekMonday)) return;
+            if (weeks[currentMonday] && weeks[currentMonday].length > 0) {
+                selectedWeekMonday = currentMonday;
+            } else {
+                const upcoming = weekKeys.filter(k => k >= currentMonday && weeks[k] && weeks[k].length > 0);
+                selectedWeekMonday = upcoming.length > 0 ? upcoming[0] : currentMonday;
+            }
+        }
+
+        function changeWeek(delta) {
+            const { weekKeys } = getWeekDataStructure(SCHEDULE_DATA);
+            const idx = weekKeys.indexOf(selectedWeekMonday);
+            if (idx === -1) return;
+            const newIdx = idx + delta;
+            if (newIdx >= 0 && newIdx < weekKeys.length) {
+                selectedWeekMonday = weekKeys[newIdx];
+                renderWeekView(SCHEDULE_DATA);
+            }
+        }
+
+        function goToCurrentWeek() {
+            const { currentMonday } = getWeekDataStructure(SCHEDULE_DATA);
+            selectedWeekMonday = currentMonday;
+            renderWeekView(SCHEDULE_DATA);
+        }
+
+        function renderWeekView(data) {
+            const t = I18N[currentLang];
+            const navBar = document.getElementById('weekNavBar');
+            const titleEl = document.getElementById('weekTitleDisplay');
+            const swipeHint = document.getElementById('weekSwipeHint');
+            const gridEl = document.getElementById('weekGridDisplay');
+            const emptyEl = document.getElementById('weekEmptyState');
+
+            if (!gridEl) return;
+            if (data.length === 0) {
+                if (navBar) navBar.style.display = 'none';
+                if (titleEl) titleEl.style.display = 'none';
+                if (swipeHint) swipeHint.style.display = 'none';
+                gridEl.innerHTML = '';
+                if (emptyEl) {
+                    emptyEl.style.display = 'block';
+                    emptyEl.textContent = t.emptyFilter;
+                }
+                return;
+            }
+
+            ensureSelectedWeek(data);
+            const { weeks, weekKeys, currentMonday } = getWeekDataStructure(data);
+            const idx = weekKeys.indexOf(selectedWeekMonday);
+
+            if (navBar) navBar.style.display = 'flex';
+            if (titleEl) titleEl.style.display = 'block';
+            if (swipeHint) swipeHint.style.display = 'block';
+
+            const btnPrev = document.getElementById('btnPrevWeek');
+            const btnNext = document.getElementById('btnNextWeek');
+            const btnCurrent = document.getElementById('btnCurrentWeek');
+
+            if (btnPrev) btnPrev.disabled = (idx <= 0);
+            if (btnNext) btnNext.disabled = (idx >= weekKeys.length - 1);
+            if (btnCurrent) btnCurrent.classList.toggle('is-active', selectedWeekMonday === currentMonday);
+
+            const weekEndMs = selectedWeekMonday + 6 * 24 * 3600 * 1000;
+            const fmt = (ms) => {
+                const dt = new Date(ms);
+                return String(dt.getDate()).padStart(2, '0') + '/' + String(dt.getMonth() + 1).padStart(2, '0') + '/' + dt.getFullYear();
+            };
+
+            titleEl.textContent = t.weekTitlePrefix + fmt(selectedWeekMonday) + ' – ' + fmt(weekEndMs);
+
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+
+            const items = weeks[selectedWeekMonday] || [];
+            let cellsHtml = '';
+
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(selectedWeekMonday + i * 24 * 3600 * 1000);
+                const dd = String(dayDate.getDate()).padStart(2, '0');
+                const mm = String(dayDate.getMonth() + 1).padStart(2, '0');
+                const yyyy = dayDate.getFullYear();
+                const isToday = dayDate.getTime() === todayStart.getTime();
+                cellsHtml += '<div class="week-day-header' + (isToday ? ' week-day-today' : '') + '"><div class="week-day-name">' + t.gridDays[i] + '</div><div class="week-day-date">' + dd + '/' + mm + '/' + yyyy + '</div></div>';
+            }
+
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(selectedWeekMonday + i * 24 * 3600 * 1000);
+                const isToday = dayDate.getTime() === todayStart.getTime();
+                const dayItems = items.filter(it => {
+                    const itDate = new Date(it.timestamp);
+                    return itDate.getDate() === dayDate.getDate() && itDate.getMonth() === dayDate.getMonth() && itDate.getFullYear() === dayDate.getFullYear();
+                });
+                const cardsHtml = dayItems.map(it => {
+                    const tag = tagLabel(it.platform);
+                    const range = getLiveRange(it);
+                    const rangeAttrs = range ? ' data-start-ms="' + range.startMs + '" data-end-ms="' + range.endMs + '"' : '';
+                    return '<div class="week-card"' + rangeAttrs + '><div class="week-card-game">' + escapeHtml(it.game) + '</div><div class="week-card-line">' + (it.start || '--:--') + ' - ' + (it.end || '--:--') + '</div><div class="week-card-line week-tag"><span class="tag-platform ' + tag.cls + '">' + tag.icon + tag.text + '</span></div><a class="live-indicator" href="https://youtube.com/@try2_live" target="_blank" rel="noopener noreferrer" style="display:none;">🔴 LIVE</a><span class="countdown-badge" style="display:none;"></span><span class="streamed-badge" style="display:none;">' + t.badgeEnded + '</span></div>';
+                }).join('');
+                cellsHtml += '<div class="week-day-body' + (isToday ? ' week-day-today' : '') + '">' + cardsHtml + '</div>';
+            }
+
+            gridEl.innerHTML = cellsHtml;
+            if (emptyEl) {
+                emptyEl.style.display = items.length === 0 ? 'block' : 'none';
+                emptyEl.textContent = t.emptyWeek;
+            }
+            updateLiveBadges();
+        }
+
+        function switchView(view) {
+            const stripBtn = document.getElementById('viewBtnStrip');
+            const weekBtn = document.getElementById('viewBtnWeek');
+            const stripWrap = document.getElementById('stripViewWrap');
+            const weekWrap = document.getElementById('weekViewWrap');
+            if (view === 'week') {
+                stripBtn.classList.remove('active');
+                weekBtn.classList.add('active');
+                stripWrap.style.display = 'none';
+                weekWrap.style.display = 'block';
+            } else {
+                weekBtn.classList.remove('active');
+                stripBtn.classList.add('active');
+                weekWrap.style.display = 'none';
+                stripWrap.style.display = 'block';
+            }
+        }
+
+        function filterSchedule(category, element) {
+            currentCategory = category;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchInput = document.getElementById('gameSearchInput');
+            const searchValue = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            const clearBtn = document.getElementById('searchClearBtn');
+            if (clearBtn) clearBtn.style.display = searchValue ? 'block' : 'none';
+            const cards = document.querySelectorAll('#scheduleList .schedule-card');
+            let anyVisible = false;
+            cards.forEach(card => {
+                const matchesCategory = currentCategory === 'all' || card.getAttribute('data-category') === currentCategory;
+                const gameNameEl = card.querySelector('.game-name');
+                const gameName = gameNameEl ? gameNameEl.textContent.toLowerCase() : '';
+                const matchesSearch = !searchValue || gameName.includes(searchValue);
+                const visible = matchesCategory && matchesSearch;
+                card.style.display = visible ? 'grid' : 'none';
+                if (visible) anyVisible = true;
+            });
+            const emptyState = document.getElementById('filterEmptyState');
+            if (emptyState) {
+                emptyState.style.display = (cards.length > 0 && !anyVisible) ? 'block' : 'none';
+                emptyState.textContent = I18N[currentLang].emptyFilter;
+            }
+        }
+
+        function clearSearch() {
+            const searchInput = document.getElementById('gameSearchInput');
+            if (searchInput) searchInput.value = '';
+            applyFilters();
+        }
+
+        function formatCountdown(ms) {
+            const t = I18N[currentLang];
+            const totalSec = Math.max(0, Math.floor(ms / 1000));
+            const mm = Math.floor(totalSec / 60);
+            const ss = totalSec % 60;
+            return t.countdownPrefix + mm + ':' + String(ss).padStart(2, '0');
+        }
+
+        function updateLiveBadges() {
+            const now = Date.now();
+            const t = I18N[currentLang];
+            document.querySelectorAll('.schedule-card[data-start-ms], .week-card[data-start-ms]').forEach(card => {
+                const start = Number(card.dataset.startMs);
+                const end = Number(card.dataset.endMs);
+                const isLive = now >= start && now <= end;
+                const isStreamed = now > end;
+                const isCountingDown = !isLive && !isStreamed && (start - now) <= 3600000;
+                card.classList.toggle('is-live-now', isLive);
+                card.classList.toggle('is-streamed', isStreamed);
+                const indicator = card.querySelector('.live-indicator');
+                if (indicator) indicator.style.display = isLive ? 'inline-flex' : 'none';
+                const streamedBadge = card.querySelector('.streamed-badge');
+                if (streamedBadge) {
+                    streamedBadge.style.display = isStreamed ? 'inline-flex' : 'none';
+                    streamedBadge.textContent = t.badgeEnded;
+                }
+                const countdownBadge = card.querySelector('.countdown-badge');
+                if (countdownBadge) {
+                    if (isCountingDown) {
+                        countdownBadge.textContent = formatCountdown(start - now);
+                        countdownBadge.style.display = 'inline-flex';
+                    } else {
+                        countdownBadge.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        applyLanguage();
+        setInterval(updateLiveBadges, 1000);
+    </script>
+</body>
+</html>
