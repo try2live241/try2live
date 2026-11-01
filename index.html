@@ -161,6 +161,13 @@
     /* ===== DESKTOP: bố cục rộng (header / lịch stream / hàng chờ bên phải) ===== */
     .main-panel { display:contents; }
     .queue-section.is-empty { display:none; }
+    .side-col { display:contents; }
+    .btn-suggest { display:inline-flex; align-items:center; gap:6px; margin:14px 4px 0; padding:10px 22px; border-radius:24px; background:linear-gradient(135deg, #00b4e6, #0077a8); color:#fff; font-weight:800; font-size:0.82rem; letter-spacing:0.3px; text-decoration:none; text-transform:uppercase; box-shadow:0 8px 20px rgba(0,180,230,0.35); transition:transform 0.2s ease, box-shadow 0.2s ease; }
+    .btn-suggest:hover { transform:translateY(-2px); box-shadow:0 12px 26px rgba(0,180,230,0.5); }
+    .played-list { display:flex; flex-direction:column; gap:8px; }
+    .played-item { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 12px; border:1px solid #2d3748; background:#1a202c; border-radius:8px; color:var(--text-main); text-decoration:none; font-size:0.88rem; font-weight:700; transition:all 0.2s ease; }
+    a.played-item:hover { border-color:var(--sw-color); transform:translateY(-1px); }
+    .played-go { font-size:0.68rem; color:var(--sw-color); white-space:nowrap; }
     @media (min-width:1100px) {
         body { align-items:flex-start; padding:28px 24px; }
         .container { max-width:1280px; background:none; border:none; border-radius:0; box-shadow:none; overflow:visible;
@@ -168,11 +175,11 @@
             grid-template-areas:"header queue" "main queue" "footer footer"; gap:20px; }
         .header, .main-panel, .queue-section { background:var(--card-bg); border:1px solid var(--border-color); border-radius:20px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.7); }
 
-        .header { grid-area:header; display:grid; grid-template-columns:1fr auto; grid-template-areas:"title lang" "note note" "sub donate";
+        .header { grid-area:header; display:grid; grid-template-columns:1fr auto 1fr; grid-template-areas:"title title title" "note note note" "sub suggest donate";
             align-items:center; text-align:left; padding:22px 28px 24px;
             background:linear-gradient(180deg, rgba(255,51,68,0.08) 0%, transparent 100%), var(--card-bg); }
         .header h1 { grid-area:title; }
-        .lang-switch-wrap { grid-area:lang; margin-bottom:0; justify-self:end; }
+        .btn-suggest { grid-area:suggest; justify-self:center; margin:16px 0 0; }
         .schedule-note { grid-area:note; margin-top:4px; }
         .btn-subscribe { grid-area:sub; justify-self:start; margin-top:16px; }
         .donate-wrap { grid-area:donate; justify-self:end; margin-top:16px; position:relative; align-items:flex-end; }
@@ -191,20 +198,25 @@
         .queue-section, .queue-section.is-empty { display:block; flex:1; margin:0; padding:22px 20px; }
         .queue-grid { grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); align-content:start; }
         .footer-note { grid-area:footer; padding:0 0 6px; }
+
+        .side-col { grid-area:queue; display:flex; flex-direction:column; gap:20px; min-width:0; min-height:0; }
+        /* Hàng chờ: luôn giữ chiều cao theo nội dung (tối đa 460px rồi cuộn), không bị co theo cột trái */
+        #queueSectionWrap { flex:0 0 auto; display:flex; min-height:0; }
+        #queueSectionWrap .queue-section { max-height:460px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#2d3748 transparent; }
+        /* Game đã stream: chiếm phần còn lại, tối thiểu 300px để dạng lịch tuần (cột trái thấp) không bóp nghẹt */
+        #playedSectionWrap { flex:1 1 0; display:flex; min-height:300px; }
+        .queue-section.played-section { display:flex; flex-direction:column; min-height:0; }
+        .played-list { flex:1; overflow-y:auto; min-height:0; scrollbar-width:thin; scrollbar-color:#2d3748 transparent; }
     }
+
 </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="lang-switch-wrap">
-                <div class="lang-switch">
-                    <button type="button" class="lang-btn" id="langBtnVi" onclick="setLanguage('vi')">VIE</button>
-                    <button type="button" class="lang-btn" id="langBtnEn" onclick="setLanguage('en')">ENG</button>
-                </div>
-            </div>
             <h1>Try2Live</h1>
             <a class="btn-subscribe" id="btnSubscribe" href="https://www.youtube.com/@try2_live?sub_confirmation=1" target="_blank" rel="noopener noreferrer">🔔 Subscribe kênh</a>
+            <a class="btn-suggest" id="btnSuggest" href="https://forms.gle/uv8NbDQi2yjPU9BR9" target="_blank" rel="noopener noreferrer">💡 Đề xuất game</a>
             <div class="donate-wrap">
                 <button type="button" class="btn-donate" id="btnDonate" onclick="toggleDonate()">💰 Góp quỹ mua game</button>
                 <div class="donate-panel" id="donatePanel" style="display:none;">
@@ -258,19 +270,23 @@
             <div class="empty-note" id="weekEmptyState" style="display:none;"></div>
         </div>
         </div>
-        <div id="queueSectionWrap"></div>
+        <aside class="side-col">
+            <div id="queueSectionWrap"></div>
+            <div id="playedSectionWrap"></div>
+        </aside>
         <div class="footer-note" id="footerNote">Lịch có thể thay đổi tuỳ tình hình 🐧</div>
     </div>
 
     <script>
-        const SCHEDULE_DATA = [{"id":"mvcl0trmm5sk6","dateStr":"31/10/2026","timestamp":1793379600000,"game":"Resident Evil Village","start":"21:00","end":"22:30","platform":"switch"},{"id":"mvqrjwde774rc","dateStr":"06/11/2026","timestamp":1793898000000,"game":"Resident Evil Village","start":"21:00","end":"22:30","platform":"switch"},{"id":"mvqrjwjugu4xg","dateStr":"07/11/2026","timestamp":1793984400000,"game":"Resident Evil Village","start":"21:00","end":"22:30","platform":"switch"},{"id":"mvw8qpskvddg3","dateStr":"13/11/2026","timestamp":1794502800000,"game":"Resident Evil Village","start":"21:00","end":"22:30","platform":"switch"},{"id":"mvw8qq78o5flt","dateStr":"14/11/2026","timestamp":1794589200000,"game":"Resident Evil Village","start":"21:00","end":"22:30","platform":"switch"}];
+        const SCHEDULE_DATA = [{"id":"mvqrjwde774rc","dateStr":"06/11/2026","timestamp":1793898000000,"game":"Resident Evil Village","start":"21:00","end":"22:30","platform":"switch"},{"id":"mvqrjwjugu4xg","dateStr":"07/11/2026","timestamp":1793984400000,"game":"Resident Evil Village","start":"21:00","end":"22:30","platform":"switch"},{"id":"mvw8qpskvddg3","dateStr":"13/11/2026","timestamp":1794502800000,"game":"Resident Evil Village","start":"21:00","end":"22:30","platform":"switch"},{"id":"mvw8qq78o5flt","dateStr":"14/11/2026","timestamp":1794589200000,"game":"Resident Evil Village","start":"21:00","end":"22:30","platform":"switch"}];
         const QUEUE_DATA = [{"game":"Metaphor: ReFantazio","platform":"switch","id":"q_mtmpaqiy_dqdiv9"},{"game":"Lies of P","platform":"switch","likelihood":"low","id":"q_mtmpaqiy_e4ab3y"},{"game":"Stellar Blade","platform":"switch","likelihood":"low","id":"q_mtmpaqiy_4y5o1v"},{"game":"Resident Evil 4","platform":"switch","likelihood":"high"},{"game":"Persona 4 Revival","platform":"switch"},{"game":"Persona 6","platform":"switch"},{"game":"Terrible Lizards","platform":"pc"},{"game":"Mouthwashing","platform":"pc"}];
+        const PLAYED_DATA = [{"game":"Resident Evil 2","link":"https://www.youtube.com/playlist?list=PLLbSZrW2S_6A"},{"game":"Resident Evil 3","link":"https://www.youtube.com/playlist?list=PLLu2uZmBfuIc"},{"game":"Resident Evil 7 biohazard","link":"https://www.youtube.com/playlist?list=PLFvFIxQ3ssos"},{"game":"Resident Evil requiem","link":"https://www.youtube.com/playlist?list=PLEhYutmGsEjE"},{"game":"Resident Evil Village","link":"https://www.youtube.com/playlist?list=PLTaHx1FW8q5U"}];
         const I18N = {"vi":{"pageTitle":"Lịch Phát Sóng - Try2Live","subTitle":"Nhập lịch live stream cho 5 ngày sắp tới","viewerSubTitle":"Có thể bắt đầu hoặc kết thúc sớm/trễ hơn lịch","btnSubscribe":"🔔 Subscribe kênh","btnDonate":"💰 Góp quỹ mua game","btnZypage":"Zypage","btnBanking":"Banking","lblStk":"STK","btnCopyStk":"📋 Copy STK","dayToday":"Hôm nay","thanksDonate":"💵 Cảm ơn bạn đã buff thêm tài chính cho kênh!","dayTomorrow":"Ngày mai","copiedStk":"✅ Đã copy!","formHeading":"📝 Nhập lịch (5 ngày)","dayPrefix":"Ngày ","copyPrev":"📋 Giống ngày trước","lblDate":"Ngày (dd/mm hoặc dd/mm/yyyy)","lblPlatform":"Nền tảng","lblGame":"Tên game","lblStart":"Giờ bắt đầu","lblEnd":"Giờ kết thúc","btnSave":"Lưu & Cập nhật lịch","btnExport":"⬇ Xuất file Viewer (chỉ xem)","btnClearAll":"Xoá toàn bộ lịch đã lưu","queueHeading":"⚡ Hàng chờ (Sắp tới có thể Live)","queuePlaceholder":"Tên game","btnAddQueue":"+ Thêm","queueEmpty":"Chưa có game nào trong hàng chờ.","timezoneNote":"🕐 Giờ Việt Nam - GMT+7","viewStrip":"📋 Dạng dải","viewWeek":"🗓️ Dạng lịch tuần","tabAll":"Tất cả","tabOther":"Khác","searchPlaceholder":"🔍 Tìm tên game...","emptyTimeline":"Chưa có lịch nào — hãy nhập lịch ở phần trên.","emptyFilter":"Hiện tại chưa có lịch o_o ....","emptyWeek":"Tuần này không có lịch stream nào.","badgeLiveWindow":"Khung Giờ Live","badgeEnded":"Đã kết thúc","countdownPrefix":"⏳ Live sau ","footerNoteAdmin":"Lịch có thể thay đổi tuỳ tình hình 🐧","footerNoteViewer":"Lịch có thể thay đổi tuỳ tình hình 🐧","btnPrevWeek":"Tuần trước","btnNextWeek":"Tuần sau","btnCurrentWeek":"Tuần hiện tại","weekTitlePrefix":"Tuần ","swipeHint":"← vuốt để xem thêm →","confirmClear":"Xoá toàn bộ lịch đã lưu?","alertFillDay":"Vui lòng nhập ít nhất 1 ngày với đầy đủ Ngày và Tên game.","alertEnterGame":"Vui lòng nhập tên game.","alertNoDataExport":"Chưa có lịch nào để xuất. Hãy nhập và bấm \"Lưu & Cập nhật lịch\" trước.","weekdays":["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"],"gridDays":["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","Chủ Nhật"],"platformOther":"Khác","btnDelete":"Xoá"},"en":{"pageTitle":"Stream Schedule - Try2Live","subTitle":"Enter stream schedule for the next 5 days","viewerSubTitle":"May start or end earlier/later than scheduled","btnSubscribe":"🔔 Subscribe","btnDonate":"💰 Support game fund","btnZypage":"Zypage","btnBanking":"Banking","lblStk":"Account No.","btnCopyStk":"📋 Copy","dayToday":"Today","thanksDonate":"💵 Thank you for boosting the channel's funds!","dayTomorrow":"Tomorrow","copiedStk":"✅ Copied!","formHeading":"📝 Schedule Input (5 Days)","dayPrefix":"Day ","copyPrev":"📋 Same as previous","lblDate":"Date (dd/mm or dd/mm/yyyy)","lblPlatform":"Platform","lblGame":"Game title","lblStart":"Start time","lblEnd":"End time","btnSave":"Save & Update Schedule","btnExport":"⬇ Export Viewer File (View only)","btnClearAll":"Clear All Saved Schedule","queueHeading":"⚡ Queue (Potential Upcoming Streams)","queuePlaceholder":"Game title","btnAddQueue":"+ Add","queueEmpty":"No games in queue.","timezoneNote":"🕐 Vietnam Time - GMT+7","viewStrip":"📋 Timeline View","viewWeek":"🗓️ Week View","tabAll":"All","tabOther":"Other","searchPlaceholder":"🔍 Search game title...","emptyTimeline":"No schedule yet — enter above.","emptyFilter":"No stream scheduled right now o_o ....","emptyWeek":"No streams scheduled for this week.","badgeLiveWindow":"Live Schedule","badgeEnded":"Ended","countdownPrefix":"⏳ Live in ","footerNoteAdmin":"Schedule may change depending on circumstances 🐧 ","footerNoteViewer":"Schedule may change depending on circumstances 🐧","btnPrevWeek":"Previous Week","btnNextWeek":"Next Week","btnCurrentWeek":"Current Week","weekTitlePrefix":"Week of ","swipeHint":"← swipe to view more →","confirmClear":"Clear all saved schedule?","alertFillDay":"Please enter at least 1 day with valid Date and Game title.","alertEnterGame":"Please enter game title.","alertNoDataExport":"No schedule to export. Please save schedule first.","weekdays":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"gridDays":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"platformOther":"Other","btnDelete":"Delete"}};
 
         let currentLang = 'vi';
         try {
             const saved = localStorage.getItem('try2live_lang_v1');
-            if (saved === 'en' || saved === 'vi') currentLang = saved;
+            currentLang = 'vi';
         } catch (e) {}
 
         let currentCategory = 'all';
@@ -287,8 +303,6 @@
             document.documentElement.lang = currentLang;
             document.title = t.pageTitle;
 
-            document.getElementById('langBtnVi').classList.toggle('active', currentLang === 'vi');
-            document.getElementById('langBtnEn').classList.toggle('active', currentLang === 'en');
 
             const btnSubscribe = document.getElementById('btnSubscribe');
             if (btnSubscribe) btnSubscribe.textContent = t.btnSubscribe;
@@ -701,6 +715,22 @@
             toggleDonate();
         });
 
+        function renderPlayed() {
+            const wrap = document.getElementById('playedSectionWrap');
+            if (!wrap) return;
+            const head = '<div class="queue-header"><span class="queue-title">🎮 Game đã stream</span></div>';
+            if (!PLAYED_DATA.length) {
+                wrap.innerHTML = '<div class="queue-section played-section is-empty">' + head + '<div class="empty-note">Chưa có game nào.</div></div>';
+                return;
+            }
+            const rows = PLAYED_DATA.map(function (p) {
+                const name = escapeHtml(p.game);
+                if (p.link && p.link.indexOf('http') === 0) return '<a class="played-item" href="' + escapeHtml(p.link) + '" target="_blank" rel="noopener noreferrer"><span>' + name + '</span><span class="played-go">▶ Xem lại</span></a>';
+                return '<div class="played-item"><span>' + name + '</span></div>';
+            }).join('');
+            wrap.innerHTML = '<div class="queue-section played-section">' + head + '<div class="played-list">' + rows + '</div></div>';
+        }
+
         function relDayLabel(d) {
             const t = I18N[currentLang];
             const now = new Date();
@@ -765,6 +795,7 @@
         }
 
         applyLanguage();
+        renderPlayed();
         setInterval(function () { updateLiveBadges(); checkDayRollover(); }, 1000);
     </script>
 </body>
