@@ -229,16 +229,16 @@
         .donate-wrap { display:flex; position:relative; }
         .donate-panel { position:absolute; top:calc(100% + 10px); right:0; width:320px; z-index:30; margin:0; box-shadow:0 24px 48px -12px rgba(0,0,0,0.8); }
         .main-panel { grid-area:main; }
-        .timeline { max-height:72vh; overflow-y:auto; overscroll-behavior:contain; padding-right:14px; }
+        .timeline { padding-right:0; }
         .week-grid { min-width:0; }
         .week-swipe-hint { display:none !important; }
-        .side-col { grid-area:side; position:sticky; top:24px; max-height:calc(100vh - 48px); min-height:0; }
+        .side-col { grid-area:side; }
         #queueSectionWrap { flex:0 0 auto; min-height:0; display:flex; }
-        #queueSectionWrap .queue-section, #queueSectionWrap .queue-section.is-empty { display:block; flex:1; max-height:460px; overflow-y:auto; }
+        #queueSectionWrap .queue-section, #queueSectionWrap .queue-section.is-empty { display:block; flex:1; }
         .queue-grid { grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); align-content:start; }
         #playedSectionWrap { flex:1 1 auto; min-height:260px; display:flex; }
         .queue-section.played-section, .queue-section.played-section.is-empty { display:flex; flex-direction:column; flex:1; min-height:0; }
-        .played-list { flex:1; overflow-y:auto; min-height:0; }
+        .played-list { flex:1; }
         .footer-note { grid-area:footer; padding:0 0 6px; }
     }
 </style>
