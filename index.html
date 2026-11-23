@@ -3,229 +3,250 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lịch Phát Sóng - Try2Live</title>
+<meta name="theme-color" content="#08090d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
     :root {
-        --bg-main: #0a0c10;
-        --card-bg: #141820;
-        --card-hover: #1c2333;
-        --pc-color: #ff3344;
-        --pc-glow: rgba(255, 51, 68, 0.35);
-        --sw-color: #00d2ff;
-        --sw-glow: rgba(0, 210, 255, 0.35);
-        --text-main: #f0f6fc;
-        --text-muted: #8b949e;
-        --border-color: #272f3d;
+        --bg: #08090d;
+        --surface: #111319;
+        --surface-2: #171a22;
+        --surface-3: #1e222c;
+        --surface-hover: #242936;
+        --line: rgba(255,255,255,0.07);
+        --line-strong: rgba(255,255,255,0.13);
+        --text: #eef1f6;
+        --muted: #8b93a5;
+        --subtle: #5f6779;
+        --brand: #ff3d5a;
+        --brand-2: #ff7849;
+        --brand-glow: rgba(255,61,90,0.35);
+        --accent: #38d4ff;
+        --accent-glow: rgba(56,212,255,0.3);
+        --pc: #5b8cff;
+        --switch: #ff4d61;
+        --other: #9aa3b4;
+        --amber: #fbbf24;
+        --radius-lg: 20px;
+        --radius: 14px;
+        --shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 24px 48px -24px rgba(0,0,0,0.85);
+        /* tên biến cũ, vẫn dùng trong vài style inline */
+        --text-main: var(--text);
+        --text-muted: var(--muted);
+        --border-color: var(--line-strong);
+        --pc-color: var(--brand);
+        --pc-glow: var(--brand-glow);
+        --sw-color: var(--accent);
+        --sw-glow: var(--accent-glow);
+        --card-bg: var(--surface);
+        --card-hover: var(--surface-hover);
+        --queue-color: var(--amber);
+        color-scheme: dark;
     }
-    * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system, BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; }
-    body { background: radial-gradient(circle at 50% 0%, #12161f 0%, var(--bg-main) 55%); color: var(--text-main); min-height:100vh; display:flex; justify-content:center; align-items:center; padding:30px 16px; }
-    .container { width:100%; max-width:700px; background-color:var(--card-bg); border-radius:20px; border:1px solid var(--border-color); box-shadow:0 25px 50px -12px rgba(0,0,0,0.7); overflow:hidden; }
-    .header { padding:22px 24px 18px; text-align:center; border-bottom:1px solid var(--border-color); background:linear-gradient(180deg, rgba(255,51,68,0.08) 0%, transparent 100%); }
-    .header h1 { font-size:1.7rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
-    .lang-switch-wrap { display:flex; justify-content:center; margin-bottom:12px; }
-    .lang-switch { display:inline-flex; align-items:center; background-color:#0d1117; border:1px solid var(--border-color); border-radius:20px; padding:3px; }
-    .lang-btn { background:transparent; border:none; color:var(--text-muted); padding:4px 14px; border-radius:16px; font-size:0.75rem; font-weight:800; cursor:pointer; letter-spacing:0.5px; transition:all 0.2s ease; }
-    .lang-btn:hover { color:#fff; }
-    .lang-btn.active { background:linear-gradient(135deg, var(--pc-color), #990011); color:#fff; box-shadow:0 0 10px var(--pc-glow); }
-    .btn-subscribe {
-        display:inline-flex; align-items:center; gap:6px; margin-top:14px; padding:10px 22px; border-radius:24px;
-        background:linear-gradient(135deg, #ff0000, #b30000); color:#fff; font-weight:800; font-size:0.82rem;
-        letter-spacing:0.3px; text-decoration:none; text-transform:uppercase; box-shadow:0 8px 20px rgba(255,0,0,0.35);
-        transition:transform 0.2s ease, box-shadow 0.2s ease;
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { -webkit-text-size-adjust:100%; }
+    body {
+        font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg);
+        background-image:
+            radial-gradient(900px 520px at 12% -12%, rgba(255,61,90,0.14), transparent 60%),
+            radial-gradient(800px 520px at 100% -5%, rgba(56,212,255,0.09), transparent 60%);
+        background-attachment: fixed;
+        color: var(--text); min-height:100vh; line-height:1.45; -webkit-font-smoothing:antialiased;
     }
-    .btn-subscribe:hover { transform:translateY(-2px); box-shadow:0 12px 26px rgba(255,0,0,0.5); }
-    .donate-wrap { margin-top:12px; display:flex; flex-direction:column; align-items:center; gap:10px; }
-    .btn-donate { display:inline-flex; align-items:center; gap:6px; padding:10px 22px; border-radius:24px; border:none; cursor:pointer; background:linear-gradient(135deg, #f59e0b, #d97706); color:#1a1000; font-weight:800; font-size:0.82rem; letter-spacing:0.3px; text-transform:uppercase; box-shadow:0 8px 20px rgba(245,158,11,0.35); transition:transform 0.2s ease, box-shadow 0.2s ease; }
-    .btn-donate:hover { transform:translateY(-2px); box-shadow:0 12px 26px rgba(245,158,11,0.5); }
-    .donate-panel { width:100%; display:flex; flex-direction:column; align-items:center; gap:12px; }
-    .donate-thanks { padding:8px 16px; border-radius:14px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.4); color:#fbbf24; font-size:0.82rem; font-weight:700; text-align:center; line-height:1.4; animation: thanksPop 0.4s ease; }
-    @keyframes thanksPop { 0% { opacity:0; transform:translateY(-6px) scale(0.96); } 100% { opacity:1; transform:none; } }
-    .donate-options { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-    .donate-opt { display:inline-flex; align-items:center; justify-content:center; min-width:120px; padding:9px 20px; border-radius:12px; background-color:#1a202c; border:1px solid var(--border-color); color:var(--text-main); font-size:0.85rem; font-weight:700; text-decoration:none; cursor:pointer; transition:all 0.2s ease; }
-    .donate-opt:hover { border-color:var(--sw-color); color:#fff; transform:translateY(-1px); }
-    .donate-opt.active { background-color:var(--sw-color); color:#04222c; border-color:var(--sw-color); }
-    .bank-box { width:100%; max-width:300px; background-color:#fff; border-radius:14px; padding:10px; text-align:center; box-shadow:0 10px 24px rgba(0,0,0,0.5); }
-    .bank-box img { width:100%; height:auto; display:block; border-radius:8px; }
-    .btn-copy-stk { margin-top:8px; padding:7px 18px; border-radius:10px; border:none; background:#0a0c10; color:#fff; font-size:0.8rem; font-weight:700; cursor:pointer; transition:all 0.2s ease; }
-    .btn-copy-stk:hover { background:#1c2333; transform:translateY(-1px); }
-    .btn-copy-stk.copied { background:#16a34a; }
-    .bank-name { margin-top:8px; color:#0a0c10; font-weight:800; font-size:1rem; letter-spacing:0.5px; }
-    .bank-name + .bank-stk { margin-top:2px; }
-    .bank-stk { margin-top:8px; color:#0a0c10; font-weight:800; font-size:1rem; letter-spacing:0.5px; user-select:all; }
-    .schedule-note { margin-top:10px; font-size:0.75rem; color:var(--text-muted); font-style:italic; }
-    .filter-tabs { display:flex; justify-content:center; gap:8px; padding:16px 20px 8px; flex-wrap:wrap; }
-    .tab-btn { background-color:#1a202c; border:1px solid var(--border-color); color:var(--text-muted); padding:6px 16px; border-radius:20px; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.25s ease; }
-    .tab-btn:hover { color:#fff; transform:translateY(-1px); }
-    .tab-btn.active { background-color:var(--pc-color); color:#fff; border-color:var(--pc-color); box-shadow:0 0 14px var(--pc-glow); }
-    .search-row { padding:4px 20px 12px; }
-    .search-row input {
-        width:100%; background-color:#0f131b; border:1px solid var(--border-color); color:var(--text-main);
-        padding:10px 14px; border-radius:10px; font-size:0.9rem; outline:none; box-sizing:border-box; transition:border-color 0.2s ease;
-    }
-    .search-row input:focus { border-color: var(--sw-color); }
-    .search-row input::placeholder { color: var(--text-muted); }
+    button, input, select, textarea { font:inherit; color:inherit; }
+    button { cursor:pointer; }
+    :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    ::selection { background:rgba(56,212,255,0.3); }
+    * { scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.16) transparent; }
+
+    /* ---------- Thẻ hệ máy ---------- */
+    .tag-platform { display:inline-flex; align-items:center; gap:5px; font-size:0.68rem; font-weight:700; letter-spacing:0.02em; padding:3px 8px; border-radius:999px; border:1px solid; line-height:1.2; white-space:nowrap; }
+    .tag-pc { color:#b3caff; background:rgba(91,140,255,0.14); border-color:rgba(91,140,255,0.38); }
+    .tag-switch { color:#ffa3ad; background:rgba(255,77,97,0.14); border-color:rgba(255,77,97,0.38); }
+    .tag-other { color:#cdd2dc; background:rgba(154,163,180,0.12); border-color:rgba(154,163,180,0.3); }
+
+    .empty-note { grid-column:1 / -1; text-align:center; color:var(--muted); font-size:0.85rem; padding:26px 16px; border:1px dashed var(--line-strong); border-radius:var(--radius); background:rgba(255,255,255,0.015); }
+    #filterEmptyState, #weekEmptyState { margin:4px 20px 20px; }
+    .timezone-note { font-size:0.72rem; color:var(--muted); }
+
+    /* ---------- Chuyển dạng xem ---------- */
+    .view-toggle { display:flex; gap:4px; margin:14px 20px 0; padding:4px; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; }
+    .view-toggle-btn { flex:1; background:transparent; border:0; color:var(--muted); padding:9px 12px; border-radius:9px; font-size:0.82rem; font-weight:600; transition:color .2s, background .2s, box-shadow .2s; }
+    .view-toggle-btn:hover { color:var(--text); }
+    .view-toggle-btn.active { background:var(--surface-hover); color:var(--text); box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 4px 12px rgba(0,0,0,0.35); }
+
+    /* ---------- Lọc + tìm ---------- */
+    .filter-tabs { display:flex; gap:6px; padding:16px 20px 10px; flex-wrap:wrap; }
+    .tab-btn { background:transparent; border:1px solid var(--line-strong); color:var(--muted); padding:6px 14px; border-radius:999px; font-size:0.8rem; font-weight:600; transition:all .2s ease; }
+    .tab-btn:hover { color:var(--text); border-color:rgba(255,255,255,0.26); }
+    .tab-btn.active { background:var(--text); color:#0b0d12; border-color:var(--text); }
+    .search-row { padding:0 20px 6px; }
     .search-wrap { position:relative; }
-    .search-wrap input { padding-right:34px; }
-    .search-clear {
-        position:absolute; right:6px; top:50%; transform:translateY(-50%); background:transparent; border:none;
-        color:var(--text-muted); cursor:pointer; font-size:0.85rem; padding:6px; line-height:1;
-    }
-    .search-clear:hover { color:#fff; }
-    .empty-note { text-align:center; color:var(--text-muted); font-size:0.85rem; padding:20px; }
-    .timeline { padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
-    .schedule-card { background-color:#181e29; border:1px solid var(--border-color); border-radius:14px; padding:18px 20px; display:grid; flex-shrink:0; grid-template-columns:130px 1fr auto; align-items:center; gap:16px; position:relative; overflow:hidden; transition:all 0.3s ease; }
-    .schedule-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; transition:width 0.25s ease; }
-    .schedule-card.pc::before { background-color:#2f6fed; }
-    .schedule-card.switch::before { background-color:#ff3344; }
-    .schedule-card.other::before { background-color:#8b949e; }
-    .live-indicator {
-        display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; font-weight:800; letter-spacing:0.5px;
-        background:linear-gradient(135deg, var(--pc-color), #990011); color:#fff; padding:2px 8px; border-radius:4px;
-        animation: pulseLive 1.4s infinite; text-decoration:none; cursor:pointer; text-transform:uppercase;
-    }
-    .live-indicator:hover { filter:brightness(1.1); }
-    @keyframes pulseLive { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-    .schedule-card.is-live-now { border-color:#ff3344; box-shadow:0 0 0 1px rgba(255,51,68,0.45), 0 10px 24px var(--pc-glow); }
-    .streamed-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; font-weight:800; letter-spacing:0.5px; color:#8b949e; padding:2px 8px; border:1px solid #4b5563; border-radius:4px; text-transform:uppercase; }
-    .schedule-card.is-streamed { filter:grayscale(1); opacity:0.55; }
-    .schedule-card.is-streamed:hover { opacity:0.75; }
-    .countdown-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.68rem; font-weight:800; letter-spacing:0.3px; color:#f59e0b; }
-    .week-swipe-hint { text-align:center; font-size:0.7rem; color:var(--text-muted); padding:4px 20px 0; }
-    .week-day-today { position:relative; box-shadow: inset 0 0 0 2px #1e40ff; animation: blinkToday 1.4s infinite; }
-    @keyframes blinkToday { 0%,100% { box-shadow: inset 0 0 0 2px #1e40ff; } 50% { box-shadow: inset 0 0 0 2px rgba(30,64,255,0.25); } }
-    .schedule-card:hover { transform:translateY(-3px) scale(1.01); background-color:var(--card-hover); border-color:rgba(255,255,255,0.2); }
-    .schedule-card.pc:hover { box-shadow:0 10px 24px rgba(47,111,237,0.35); }
-    .schedule-card.switch:hover { box-shadow:0 10px 24px rgba(255,51,68,0.35); }
-    .schedule-card:hover::before { width:8px; }
-    .date-col { display:flex; flex-direction:column; gap:2px; }
-    .date-day { font-size:0.95rem; font-weight:700; color:#fff; }
-    .date-weekday { font-size:0.8rem; color:#58a6ff; font-weight:600; }
-    .game-col { display:flex; align-items:center; }
+    .search-row input { width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:11px 40px 11px 14px; border-radius:12px; font-size:0.9rem; outline:none; transition:border-color .2s, box-shadow .2s; }
+    .search-row input:focus { border-color:rgba(56,212,255,0.55); box-shadow:0 0 0 4px rgba(56,212,255,0.12); }
+    .search-row input::placeholder { color:var(--subtle); }
+    .search-clear { position:absolute; right:7px; top:50%; transform:translateY(-50%); background:var(--surface-3); border:0; color:var(--muted); width:26px; height:26px; border-radius:8px; font-size:0.72rem; line-height:1; }
+    .search-clear:hover { color:var(--text); background:var(--surface-hover); }
+
+    /* ---------- Dạng dải ---------- */
+    .timeline { padding:12px 20px 20px; display:flex; flex-direction:column; gap:10px; }
+    .schedule-card { position:relative; display:grid; align-items:center; gap:8px 18px; padding:16px 18px 16px 22px; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; flex-shrink:0; transition:transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease, opacity .2s ease; animation:cardIn .45s ease backwards; }
+    @keyframes cardIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    .schedule-card::before { content:''; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:0 3px 3px 0; background:var(--other); transition:top .2s ease, bottom .2s ease; }
+    .schedule-card.pc::before { background:var(--pc); }
+    .schedule-card.switch::before { background:var(--switch); }
+    .schedule-card:hover { background:var(--surface-3); border-color:var(--line-strong); transform:translateY(-2px); box-shadow:0 16px 32px -16px rgba(0,0,0,0.85); }
+    .schedule-card:hover::before { top:0; bottom:0; }
+    .date-col { grid-area:date; display:flex; flex-direction:column; gap:2px; min-width:0; }
+    .date-day { font-size:0.95rem; font-weight:700; font-variant-numeric:tabular-nums; }
+    .date-weekday { font-size:0.76rem; color:var(--muted); font-weight:500; }
+    .game-col { grid-area:game; min-width:0; }
     .game-title-wrap { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-    .game-name { font-size:1.05rem; font-weight:700; color:#fff; }
-    .tag-platform { display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; padding:2px 7px; border-radius:4px; font-weight:800; letter-spacing:0.5px; text-transform:uppercase; }
-    .tag-pc { background:linear-gradient(135deg,#2f6fed,#1d4ed8); color:#fff; box-shadow:0 0 8px rgba(47,111,237,0.4); }
-    .tag-switch { background:linear-gradient(135deg,#ff3344,#990011); color:#fff; box-shadow:0 0 8px rgba(255,51,68,0.4); }
-    .tag-other { background:linear-gradient(135deg,#8b949e,#4b5563); color:#fff; }
-    .live-badge { padding:8px 14px; border-radius:10px; text-align:right; display:flex; flex-direction:column; align-items:flex-end; min-width:115px; transition:transform 0.2s ease; }
-    .schedule-card.pc .live-badge { background-color:#12233f; border:1px solid rgba(47,111,237,0.35); color:#8ab4ff; }
-    .schedule-card.switch .live-badge { background-color:#231215; border:1px solid rgba(255,51,68,0.35); color:#ff6b7a; }
-    .schedule-card.other .live-badge { background-color:#1a1e26; border:1px solid rgba(139,148,158,0.35); color:#c9d1d9; }
-    .schedule-card:hover .live-badge { transform:scale(1.05); }
-    .live-badge .badge-label { font-size:0.68rem; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; opacity:0.85; }
-    .live-badge .badge-time { font-size:0.9rem; font-weight:800; }
-    .footer-note { text-align:center; padding:14px 20px 22px; font-size:0.75rem; color:var(--text-muted); }
-    .queue-section { margin:10px 20px 24px; background-color:#121620; border:1px dashed #343d52; border-radius:14px; padding:16px 18px; }
-    .queue-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
-    .queue-title { font-size:0.85rem; font-weight:700; text-transform:uppercase; color:#f59e0b; letter-spacing:0.5px; }
-    .queue-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; }
-    .queue-card { background-color:#1a202c; border:1px solid #2d3748; border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:6px; transition:all 0.2s ease; }
-    .queue-card:hover { transform:translateY(-2px); background-color:#242c3d; border-color:#4a5568; }
-    .queue-name { font-size:0.88rem; font-weight:700; color:#e2e8f0; }
+    .game-name { font-size:1.02rem; font-weight:700; letter-spacing:-0.01em; }
+    .live-badge { grid-area:badge; display:flex; flex-direction:column; align-items:flex-end; gap:1px; padding:7px 12px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid var(--line); min-width:112px; text-align:right; }
+    .live-badge .badge-label { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); font-weight:600; }
+    .live-badge .badge-time { font-size:0.92rem; font-weight:700; font-variant-numeric:tabular-nums; }
+    .schedule-card.pc .live-badge .badge-time { color:#b3caff; }
+    .schedule-card.switch .live-badge .badge-time { color:#ffa3ad; }
+    .schedule-card.other .live-badge .badge-time { color:#d6dae3; }
+
+    /* ---------- Trạng thái live ---------- */
+    .live-indicator { display:inline-flex; align-items:center; gap:6px; font-size:0.66rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; text-decoration:none; color:#fff; background:var(--brand); padding:3px 9px; border-radius:999px; animation:livePulse 1.6s infinite; }
+    .live-indicator:hover { filter:brightness(1.1); }
+    @keyframes livePulse { 0% { box-shadow:0 0 0 0 rgba(255,61,90,0.6); } 70% { box-shadow:0 0 0 8px rgba(255,61,90,0); } 100% { box-shadow:0 0 0 0 rgba(255,61,90,0); } }
+    .streamed-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.66rem; font-weight:600; color:var(--muted); padding:2px 8px; border:1px solid var(--line-strong); border-radius:999px; }
+    .countdown-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.72rem; font-weight:700; color:var(--amber); font-variant-numeric:tabular-nums; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); padding:2px 8px; border-radius:999px; }
+    .schedule-card.is-live-now { border-color:rgba(255,61,90,0.6); background:linear-gradient(90deg, rgba(255,61,90,0.13), transparent 65%), var(--surface-2); box-shadow:0 0 0 1px rgba(255,61,90,0.25), 0 18px 40px -18px var(--brand-glow); }
+    .schedule-card.is-streamed { opacity:0.45; filter:grayscale(1); }
+    .schedule-card.is-streamed:hover { opacity:0.75; }
+
+    /* ---------- Dạng lịch tuần ---------- */
+    .week-nav-bar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:16px 20px 0; }
+    .week-nav-btn { display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:8px 14px; border-radius:10px; font-size:0.78rem; font-weight:600; transition:all .2s ease; }
+    .week-nav-btn:hover:not(:disabled) { background:var(--surface-3); border-color:var(--line-strong); }
+    .week-nav-btn:disabled { opacity:0.35; cursor:not-allowed; }
+    .week-nav-btn.week-nav-current { color:var(--accent); }
+    .week-nav-btn.week-nav-current.is-active { background:rgba(56,212,255,0.12); border-color:rgba(56,212,255,0.45); }
+    .week-title { padding:14px 20px 0; text-align:center; font-size:0.86rem; font-weight:700; font-variant-numeric:tabular-nums; }
+    .week-swipe-hint { text-align:center; font-size:0.7rem; color:var(--subtle); padding:4px 20px 0; }
+    .week-scroll { overflow-x:auto; padding:12px 20px 18px; }
+    .week-grid { display:grid; grid-template-columns:repeat(7, minmax(108px, 1fr)); gap:6px; min-width:780px; }
+    .week-day-header { background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:9px 6px; text-align:center; }
+    .week-day-name { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); }
+    .week-day-date { font-size:0.72rem; font-weight:600; margin-top:2px; font-variant-numeric:tabular-nums; }
+    .week-day-header:nth-child(6) .week-day-name, .week-day-header:nth-child(7) .week-day-name { color:var(--amber); }
+    .week-day-body { background:rgba(255,255,255,0.02); border:1px solid var(--line); border-radius:12px; min-height:150px; padding:6px; display:flex; flex-direction:column; gap:6px; }
+    .week-day-header.week-day-today { background:rgba(56,212,255,0.12); border-color:rgba(56,212,255,0.5); }
+    .week-day-header.week-day-today .week-day-name { color:var(--accent); }
+    .week-day-body.week-day-today { background:rgba(56,212,255,0.05); border-color:rgba(56,212,255,0.4); }
+    .week-card { display:flex; flex-direction:column; align-items:flex-start; gap:4px; background:var(--surface-3); border:1px solid var(--line); border-radius:10px; padding:8px; transition:border-color .2s ease; }
+    .week-card:hover { border-color:var(--line-strong); }
+    .week-card-game { font-size:0.76rem; font-weight:700; line-height:1.25; }
+    .week-card-line { font-size:0.68rem; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .week-card .tag-platform { font-size:0.6rem; padding:2px 6px; }
+    .week-card .live-indicator, .week-card .streamed-badge, .week-card .countdown-badge { font-size:0.6rem; }
+    .week-card.is-live-now { border-color:rgba(255,61,90,0.6); background:rgba(255,61,90,0.1); }
+    .week-card.is-streamed { opacity:0.45; filter:grayscale(1); }
+
+    /* ---------- Thẻ hàng chờ ---------- */
+    .queue-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:8px; }
+    .queue-card { position:relative; display:flex; flex-direction:column; gap:8px; padding:12px; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; transition:transform .2s ease, background .2s ease, border-color .2s ease; }
+    .queue-card:hover { background:var(--surface-3); border-color:var(--line-strong); transform:translateY(-1px); }
+    .queue-name { font-size:0.88rem; font-weight:600; line-height:1.3; padding-right:20px; }
     .queue-card .tag-platform { align-self:flex-start; }
-    .view-toggle { display:flex; gap:8px; padding:16px 20px 0; }
-    .view-toggle-btn { flex:1; background-color:#1a202c; border:1px solid var(--border-color); color:var(--text-muted); padding:9px 10px; border-radius:10px; font-size:0.8rem; font-weight:700; cursor:pointer; transition:all 0.2s ease; }
-    .view-toggle-btn:hover { color:#fff; }
-    .view-toggle-btn.active { background-color:var(--sw-color); color:#04222c; border-color:var(--sw-color); }
-    
-    .week-nav-bar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 20px 0; }
-    .week-nav-btn {
-        background-color:#1a202c; border:1px solid var(--border-color); color:var(--text-main);
-        padding:8px 14px; border-radius:10px; font-size:0.78rem; font-weight:700; cursor:pointer;
-        transition:all 0.2s ease; display:inline-flex; align-items:center; gap:6px;
-    }
-    .week-nav-btn:hover:not(:disabled) { background-color:var(--card-hover); border-color:var(--sw-color); color:#fff; transform:translateY(-1px); }
-    .week-nav-btn:disabled { opacity:0.35; cursor:not-allowed; border-color:var(--border-color); transform:none; }
-    .week-nav-btn.week-nav-current { background:#142035; border-color:#2b4c7e; color:#58a6ff; }
-    .week-nav-btn.week-nav-current:hover:not(:disabled) { background:#1c3258; border-color:#58a6ff; color:#fff; }
-    .week-nav-btn.week-nav-current.is-active { background:rgba(0, 210, 255, 0.15); border-color:var(--sw-color); color:var(--sw-color); box-shadow:0 0 10px var(--sw-glow); }
 
-    .week-title { padding:12px 20px 0; font-size:0.82rem; font-weight:800; color:#f59e0b; text-transform:uppercase; letter-spacing:0.5px; text-align:center; }
-    .week-scroll { overflow-x:auto; padding:10px 20px 6px; }
-    .week-grid { display:grid; grid-template-columns:repeat(7, minmax(110px, 1fr)); gap:1px; background-color:#2c3850; min-width:770px; border:1.5px solid #3a4a6b; border-radius:14px; overflow:hidden; box-shadow:0 10px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,210,255,0.06); }
-    .week-day-header { background:linear-gradient(180deg,#25508f 0%,#193761 100%); color:#fff; text-align:center; padding:11px 6px; box-shadow:inset 0 -2px 0 rgba(0,210,255,0.45); }
-    .week-day-header:nth-child(6), .week-day-header:nth-child(7) { background:linear-gradient(180deg,#2d4a8c 0%,#1d3566 100%); }
-    .week-day-header:nth-child(6) .week-day-name, .week-day-header:nth-child(7) .week-day-name { color:#fcd34d; }
-    .week-day-name { font-weight:800; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.6px; }
-    .week-day-date { font-size:0.68rem; opacity:0.8; margin-top:3px; }
-    .week-day-body { background:linear-gradient(180deg,#161b26 0%,#12161e 100%); min-height:130px; padding:8px 6px; display:flex; flex-direction:column; gap:6px; }
-    .week-day-body:nth-child(13), .week-day-body:nth-child(14) { background:linear-gradient(180deg,#191e2b 0%,#141824 100%); }
-    .week-card { background:linear-gradient(180deg,#1e2535 0%,#181e2b 100%); border:1px solid #33405a; border-radius:10px; padding:8px 6px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.35); }
-    .week-card-game { font-size:0.72rem; font-weight:800; color:#ff5566; margin-bottom:3px; }
-    .week-card-line { font-size:0.64rem; color:#93c5fd; margin-top:2px; }
-    .week-card-line.week-tag { margin-top:4px; }
-    .week-card .live-indicator, .week-card .streamed-badge, .week-card .countdown-badge { margin-top:4px; justify-content:center; font-size:0.62rem; }
-    .week-card.is-live-now { border-color:#ff3344; box-shadow:0 0 0 1px rgba(255,51,68,0.45); }
-    .week-card.is-streamed { filter:grayscale(1); opacity:0.55; }
-    .timezone-note { text-align:right; padding:0 20px; font-size:0.68rem; color:var(--text-muted); font-style:italic; }
+    .footer-note { text-align:center; padding:16px 20px 22px; font-size:0.76rem; color:var(--muted); }
+
+    .brand-mark { flex:0 0 auto; width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, var(--brand), var(--brand-2)); display:inline-grid; place-items:center; box-shadow:0 8px 20px -6px var(--brand-glow); }
+    .brand-mark::before { content:''; width:0; height:0; border-left:12px solid #fff; border-top:7px solid transparent; border-bottom:7px solid transparent; margin-left:3px; }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation:none !important; transition:none !important; }
+    }
+    /* ================= TRANG NGƯỜI XEM ================= */
+    body { padding:24px 16px 40px; }
+    .container { width:100%; max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+
+    .header { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px; text-align:center; padding:24px 20px; background:linear-gradient(180deg, rgba(255,61,90,0.09), transparent 70%), var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow); }
+    .header h1 { order:-2; flex:0 0 100%; display:flex; align-items:center; justify-content:center; gap:12px; font-size:1.6rem; font-weight:800; letter-spacing:-0.02em; line-height:1.1; }
+    .schedule-note { order:-1; flex:0 0 100%; font-size:0.8rem; color:var(--muted); margin:-2px 0 6px; }
+    .btn-subscribe, .btn-suggest, .btn-donate { display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:999px; font-weight:700; font-size:0.82rem; text-decoration:none; border:1px solid transparent; white-space:nowrap; transition:transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease; }
+    .btn-subscribe { background:#ff0033; color:#fff; box-shadow:0 10px 24px -10px rgba(255,0,51,0.75); }
+    .btn-suggest { background:var(--surface-2); border-color:var(--line-strong); color:var(--text); }
+    .btn-donate { background:linear-gradient(135deg, #fcd34d, #f59e0b); color:#1a1000; box-shadow:0 10px 24px -10px rgba(245,158,11,0.75); }
+    .btn-subscribe:hover, .btn-suggest:hover, .btn-donate:hover { transform:translateY(-2px); }
+    .btn-suggest:hover { border-color:rgba(56,212,255,0.5); }
+
+    .donate-wrap { display:contents; }
+    .donate-panel { flex:0 0 100%; flex-direction:column; align-items:center; gap:12px; margin-top:6px; padding:16px; background:var(--surface-2); border:1px solid var(--line); border-radius:16px; }
+    .donate-thanks { padding:8px 14px; border-radius:12px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.35); color:#fcd34d; font-size:0.82rem; font-weight:600; text-align:center; line-height:1.45; animation:thanksPop .35s ease; }
+    @keyframes thanksPop { from { opacity:0; transform:translateY(-6px) scale(0.97); } to { opacity:1; transform:none; } }
+    .donate-options { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+    .donate-opt { display:inline-flex; align-items:center; justify-content:center; min-width:120px; padding:9px 18px; border-radius:10px; background:var(--surface-3); border:1px solid var(--line-strong); color:var(--text); font-size:0.84rem; font-weight:600; text-decoration:none; transition:all .2s ease; }
+    .donate-opt:hover { border-color:rgba(56,212,255,0.55); }
+    .donate-opt.active { background:var(--accent); color:#04222c; border-color:var(--accent); }
+    .bank-box { width:100%; max-width:280px; background:#fff; border-radius:16px; padding:12px; text-align:center; box-shadow:0 14px 30px -12px rgba(0,0,0,0.7); }
+    .bank-box img { width:100%; height:auto; display:block; border-radius:10px; }
+    .bank-name { margin-top:10px; color:#0a0c10; font-weight:800; font-size:1rem; }
+    .bank-stk { margin-top:2px; color:#0a0c10; font-weight:700; font-size:0.98rem; user-select:all; font-variant-numeric:tabular-nums; }
+    .btn-copy-stk { margin-top:10px; padding:8px 16px; border-radius:10px; border:0; background:#0b0d12; color:#fff; font-size:0.8rem; font-weight:700; transition:all .2s ease; }
+    .btn-copy-stk:hover { background:#222733; }
+    .btn-copy-stk.copied { background:#16a34a; }
+
+    .main-panel { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow); overflow:hidden; padding-top:16px; }
+    .main-panel > .timezone-note { display:flex; justify-content:flex-end; padding:0 20px; }
+    .view-toggle { margin-top:10px; }
+    .schedule-card { grid-template-columns:118px minmax(0,1fr) auto; grid-template-areas:"date game badge"; }
     @media (max-width:620px) {
-        .schedule-card { grid-template-columns:1fr; gap:10px; }
-        .live-badge { align-items:flex-start; text-align:left; width:100%; }
-        .week-nav-btn { padding:6px 10px; font-size:0.72rem; }
+        .schedule-card { grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"date badge" "game game"; gap:10px 12px; }
+        .live-badge { min-width:0; }
+        .week-nav-btn { padding:7px 10px; font-size:0.72rem; }
     }
-    /* ===== DESKTOP: bố cục rộng (header / lịch stream / hàng chờ bên phải) ===== */
-    .main-panel { display:contents; }
+    @media (max-width:420px) {
+        body { padding:14px 10px 30px; }
+        .header h1 { font-size:1.4rem; }
+    }
+
+    .side-col { display:flex; flex-direction:column; gap:16px; }
+    .queue-section { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow); padding:18px; }
     .queue-section.is-empty { display:none; }
-    .side-col { display:contents; }
-    .btn-suggest { display:inline-flex; align-items:center; gap:6px; margin:14px 4px 0; padding:10px 22px; border-radius:24px; background:linear-gradient(135deg, #00b4e6, #0077a8); color:#fff; font-weight:800; font-size:0.82rem; letter-spacing:0.3px; text-decoration:none; text-transform:uppercase; box-shadow:0 8px 20px rgba(0,180,230,0.35); transition:transform 0.2s ease, box-shadow 0.2s ease; }
-    .btn-suggest:hover { transform:translateY(-2px); box-shadow:0 12px 26px rgba(0,180,230,0.5); }
-    .played-list { display:flex; flex-direction:column; gap:8px; }
-    .played-item { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 12px; border:1px solid #2d3748; background:#1a202c; border-radius:8px; color:var(--text-main); text-decoration:none; font-size:0.88rem; font-weight:700; transition:all 0.2s ease; }
-    a.played-item:hover { border-color:var(--sw-color); transform:translateY(-1px); }
-    .played-go { font-size:0.68rem; color:var(--sw-color); white-space:nowrap; }
+    .queue-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+    .queue-title { font-size:0.92rem; font-weight:700; letter-spacing:-0.01em; }
+    .played-list { display:flex; flex-direction:column; gap:6px; }
+    .played-item { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--line); background:var(--surface-2); border-radius:10px; color:var(--text); text-decoration:none; font-size:0.86rem; font-weight:600; transition:all .2s ease; }
+    a.played-item:hover { border-color:rgba(56,212,255,0.45); background:var(--surface-3); transform:translateY(-1px); }
+    .played-go { font-size:0.7rem; color:var(--accent); white-space:nowrap; font-weight:700; }
+
+    /* Màn hình rộng */
     @media (min-width:1100px) {
-        body { align-items:flex-start; padding:28px 24px; }
-        .container { max-width:1280px; background:none; border:none; border-radius:0; box-shadow:none; overflow:visible;
-            display:grid; grid-template-columns:minmax(0,1fr) clamp(280px,24vw,340px); grid-template-rows:auto 1fr auto;
-            grid-template-areas:"header queue" "main queue" "footer footer"; gap:20px; }
-        .header, .main-panel, .queue-section { background:var(--card-bg); border:1px solid var(--border-color); border-radius:20px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.7); }
-
-        .header { grid-area:header; display:grid; grid-template-columns:1fr auto 1fr; grid-template-areas:"title title title" "note note note" "sub suggest donate";
-            align-items:center; text-align:left; padding:22px 28px 24px;
-            background:linear-gradient(180deg, rgba(255,51,68,0.08) 0%, transparent 100%), var(--card-bg); }
-        .header h1 { grid-area:title; }
-        .btn-suggest { grid-area:suggest; justify-self:center; margin:16px 0 0; }
-        .schedule-note { grid-area:note; margin-top:4px; }
-        .btn-subscribe { grid-area:sub; justify-self:start; margin-top:16px; }
-        .donate-wrap { grid-area:donate; justify-self:end; margin-top:16px; position:relative; align-items:flex-end; }
-        .donate-panel { position:absolute; top:calc(100% + 10px); right:0; width:320px; z-index:30; background:var(--card-bg);
-            border:1px solid var(--border-color); border-radius:16px; padding:16px; box-shadow:0 20px 40px rgba(0,0,0,0.65); }
-
-        .main-panel { grid-area:main; display:block; overflow:hidden; padding-top:14px; }
-        .timezone-note { padding:0 24px; }
-        .view-toggle { justify-content:space-between; padding:14px 24px 0; }
-        .view-toggle-btn { flex:0 0 auto; min-width:200px; }
-        .timeline { max-height:72vh; overflow-y:auto; overscroll-behavior:contain; padding:16px 14px 16px 24px; scrollbar-width:thin; scrollbar-color:#5b7bb5 rgba(255,255,255,0.06); }
-        @supports not (scrollbar-color: auto) {
-            .timeline::-webkit-scrollbar { width:10px; }
-            .timeline::-webkit-scrollbar-track { background:rgba(255,255,255,0.05); border-radius:10px; margin:8px 0; }
-            .timeline::-webkit-scrollbar-thumb { background:#4a638f; border-radius:10px; border:2px solid transparent; background-clip:padding-box; }
-            .timeline::-webkit-scrollbar-thumb:hover { background:#6f90cc; background-clip:padding-box; }
-        }
+        body { padding:28px 24px 40px; }
+        .container { max-width:1320px; display:grid; grid-template-columns:minmax(0,1fr) clamp(290px,25vw,350px); grid-template-areas:"header side" "main side" "footer footer"; grid-template-rows:auto 1fr auto; align-items:start; gap:20px; }
+        .header { grid-area:header; justify-content:flex-start; text-align:left; padding:22px 24px; }
+        .header h1 { flex:0 0 auto; justify-content:flex-start; }
+        .schedule-note { flex:1 1 200px; margin:0 0 0 6px; }
+        .donate-wrap { display:flex; position:relative; }
+        .donate-panel { position:absolute; top:calc(100% + 10px); right:0; width:320px; z-index:30; margin:0; box-shadow:0 24px 48px -12px rgba(0,0,0,0.8); }
+        .main-panel { grid-area:main; }
+        .timeline { max-height:72vh; overflow-y:auto; overscroll-behavior:contain; padding-right:14px; }
         .week-grid { min-width:0; }
         .week-swipe-hint { display:none !important; }
-
-        #queueSectionWrap { grid-area:queue; display:flex; min-width:0; }
-        .queue-section, .queue-section.is-empty { display:block; flex:1; margin:0; padding:22px 20px; }
+        .side-col { grid-area:side; position:sticky; top:24px; max-height:calc(100vh - 48px); min-height:0; }
+        #queueSectionWrap { flex:0 0 auto; min-height:0; display:flex; }
+        #queueSectionWrap .queue-section, #queueSectionWrap .queue-section.is-empty { display:block; flex:1; max-height:460px; overflow-y:auto; }
         .queue-grid { grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); align-content:start; }
+        #playedSectionWrap { flex:1 1 auto; min-height:260px; display:flex; }
+        .queue-section.played-section, .queue-section.played-section.is-empty { display:flex; flex-direction:column; flex:1; min-height:0; }
+        .played-list { flex:1; overflow-y:auto; min-height:0; }
         .footer-note { grid-area:footer; padding:0 0 6px; }
-
-        .side-col { grid-area:queue; display:flex; flex-direction:column; gap:20px; min-width:0; min-height:0; }
-        /* Hàng chờ: luôn giữ chiều cao theo nội dung (tối đa 460px rồi cuộn), không bị co theo cột trái */
-        #queueSectionWrap { flex:0 0 auto; display:flex; min-height:0; }
-        #queueSectionWrap .queue-section { max-height:460px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#2d3748 transparent; }
-        /* Game đã stream: chiếm phần còn lại, tối thiểu 300px để dạng lịch tuần (cột trái thấp) không bóp nghẹt */
-        #playedSectionWrap { flex:1 1 0; display:flex; min-height:300px; }
-        .queue-section.played-section { display:flex; flex-direction:column; min-height:0; }
-        .played-list { flex:1; overflow-y:auto; min-height:0; scrollbar-width:thin; scrollbar-color:#2d3748 transparent; }
     }
-
 </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Try2Live</h1>
+            <h1><span class="brand-mark" aria-hidden="true"></span>Try2Live</h1>
             <a class="btn-subscribe" id="btnSubscribe" href="https://www.youtube.com/@try2_live?sub_confirmation=1" target="_blank" rel="noopener noreferrer">🔔 Subscribe kênh</a>
             <a class="btn-suggest" id="btnSuggest" href="https://forms.gle/uv8NbDQi2yjPU9BR9" target="_blank" rel="noopener noreferrer">💡 Đề xuất game</a>
             <div class="donate-wrap">
